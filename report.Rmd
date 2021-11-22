@@ -2,7 +2,11 @@
 title: "report"
 author: "Julia Chałasiak"
 date: "20 11 2021"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: spacelab
 ---
 
 ```{r setup, include=FALSE}
@@ -31,22 +35,21 @@ btcMkpru <- read.csv("./datasets/BCHAIN-MKPRU.csv")
 btcTrvou <- read.csv("./datasets/BCHAIN-TRVOU.csv")
 ```
 
-## R Markdown
+## Bitcoin's data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r }
-summary(cars)
+```{r bitcoin simple}
+ggplot(btcDiff, aes(x=Date, y=Value, group = 1)) + geom_line()
+ggplot(btcHrate, aes(x=Date, y=Value, group = 1)) + geom_line()
+ggplot(btcMkpru, aes(x=Date, y=Value, group = 1)) + geom_line()
+ggplot(btcTrvou, aes(x=Date, y=Value, group = 1)) + geom_line()
 ```
 
-## Including Plots
+```{r tidy}
+currExchWONA <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
