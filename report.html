@@ -259,6 +259,7 @@ library(imputeTS)</code></pre>
 goldPrices &lt;- read.csv(&quot;./datasets/Gold prices.csv&quot;)
 spComposite &lt;- read.csv(&quot;./datasets/S&amp;P Composite.csv&quot;)
 worldDevInd &lt;- read_xlsx(&quot;./datasets/World_Development_Indicators.xlsx&quot;)
+worldDevInd &lt;- data.frame(worldDevInd)
 btcMetadata &lt;- read.csv(&quot;./datasets/BCHAIN_metadata.csv&quot;)
 btcDiff &lt;- read.csv(&quot;./datasets/BCHAIN-DIFF.csv&quot;)
 btcHrate &lt;- read.csv(&quot;./datasets/BCHAIN-HRATE.csv&quot;)
@@ -280,7 +281,140 @@ btcTrvou &lt;- read.csv(&quot;./datasets/BCHAIN-TRVOU.csv&quot;)</code></pre>
 <h2>Preparing Currency Data</h2>
 <pre class="r"><code>currExchWithoutNA &lt;- currExchRates %&gt;% select(which(colMeans(is.na(.)) &lt; 0.2))
 currExchAfterEuro &lt;- currExchWithoutNA %&gt;% mutate(Euro = ifelse(Date &lt; as.Date(&quot;1998-10-30&quot;, format=&quot;%Y-%m-%d&quot;), 0, Euro))
-replacedCurr &lt;- na_ma(currExchAfterEuro, k = 1)</code></pre>
+CurrExchRatesClean &lt;- na_ma(currExchAfterEuro, k = 1)</code></pre>
+</div>
+<div id="preparing-gold-prices-data" class="section level2">
+<h2>Preparing Gold Prices Data</h2>
+<pre class="r"><code>goldPricesAfter &lt;- goldPrices %&gt;% mutate(
+  EURO..AM. = ifelse(Date &lt; as.Date(&quot;1998-12-31&quot;, format=&quot;%Y-%m-%d&quot;), 0, EURO..AM.),
+  EURO..PM. = ifelse(Date &lt; as.Date(&quot;1998-12-31&quot;, format=&quot;%Y-%m-%d&quot;), 0, EURO..PM.),
+  USD..PM. = ifelse(Date &lt; as.Date(&quot;1968-03-14&quot;, format=&quot;%Y-%m-%d&quot;), 0, USD..PM.),
+  GBP..PM. = ifelse(Date &lt; as.Date(&quot;1968-03-14&quot;, format=&quot;%Y-%m-%d&quot;), 0, GBP..PM.))
+goldPricesClean &lt;- na_ma(goldPricesAfter, k = 1)</code></pre>
+</div>
+<div id="preparing-world-dev-index" class="section level2">
+<h2>Preparing World Dev Index</h2>
+<pre class="r"><code>worldDevIndAfter &lt;- pivot_longer(worldDevInd, &#39;X1970..YR1970.&#39;:&#39;X2020..YR2020.&#39;, names_to = &quot;Year&quot;,
+values_to = &quot;Value&quot;, values_drop_na = FALSE)
+worldDevIndClean &lt;- worldDevIndAfter %&gt;% 
+  mutate(Year = substr(Year, 2, 5)) %&gt;% 
+  filter(grepl(&#39;&#39;, Series.Name)) %&gt;%
+  relocate(Year, .after = Country.Code)</code></pre>
+</div>
+<div id="preparing-sp-composite" class="section level2">
+<h2>Preparing SP Composite</h2>
+<pre class="r"><code>spCompositeClean &lt;- spComposite %&gt;% 
+  mutate(Cyclically.Adjusted.PE.Ratio = ifelse(Year &lt; as.Date(&quot;1880-12-31&quot;, format=&quot;%Y-%m-%d&quot;), 0, Cyclically.Adjusted.PE.Ratio)) %&gt;% rename(Date = Year)
+spCompositeClean &lt;- na_ma(spCompositeClean, k = 1)</code></pre>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<pre class="r"><code>summary(CurrExchRatesClean)</code></pre>
+<pre><code>##      Date           Australian.Dollar Bahrain.Dinar   Brazilian.Real 
+##  Length:5978        Min.   :0.4833    Min.   :0.376   Min.   :0.832  
+##  Class :character   1st Qu.:0.6653    1st Qu.:0.376   1st Qu.:1.720  
+##  Mode  :character   Median :0.7596    Median :0.376   Median :2.063  
+##                     Mean   :0.7682    Mean   :0.376   Mean   :2.158  
+##                     3rd Qu.:0.8687    3rd Qu.:0.376   3rd Qu.:2.717  
+##                     Max.   :1.1055    Max.   :0.376   Max.   :4.195  
+##  Canadian.Dollar Colombian.Peso    Danish.Krone        Euro       
+##  Min.   :0.917   Min.   : 833.2   Min.   :4.665   Min.   :0.0000  
+##  1st Qu.:1.086   1st Qu.:1795.4   1st Qu.:5.612   1st Qu.:0.9381  
+##  Median :1.289   Median :2042.4   Median :6.051   Median :1.1784  
+##  Mean   :1.266   Mean   :2082.8   Mean   :6.282   Mean   :1.0068  
+##  3rd Qu.:1.403   3rd Qu.:2450.3   3rd Qu.:6.804   3rd Qu.:1.3142  
+##  Max.   :1.613   Max.   :3434.9   Max.   :9.006   Max.   :1.5990  
+##  Icelandic.Krona   Indian.Rupee    Japanese.Yen      Korean.Won  
+##  Min.   : 54.72   Min.   :31.37   Min.   : 75.86   Min.   : 756  
+##  1st Qu.: 70.42   1st Qu.:43.13   1st Qu.:100.77   1st Qu.:1017  
+##  Median : 84.06   Median :45.99   Median :109.39   Median :1122  
+##  Mean   : 92.42   Mean   :48.18   Mean   :107.97   Mean   :1103  
+##  3rd Qu.:116.89   3rd Qu.:52.97   3rd Qu.:118.39   3rd Qu.:1187  
+##  Max.   :147.98   Max.   :68.78   Max.   :147.00   Max.   :1965  
+##  Kuwaiti.Dinar     Libyan.Dinar   Malaysian.Ringgit Nepalese.Rupee  
+##  Min.   :0.2646   Min.   :0.525   Min.   :2.436     Min.   : 49.88  
+##  1st Qu.:0.2869   1st Qu.:0.662   1st Qu.:3.182     1st Qu.: 68.47  
+##  Median :0.2976   Median :1.932   Median :3.671     Median : 74.00  
+##  Mean   :0.2941   Mean   :1.507   Mean   :3.504     Mean   : 77.18  
+##  3rd Qu.:0.3029   3rd Qu.:1.932   3rd Qu.:3.800     3rd Qu.: 84.70  
+##  Max.   :0.3089   Max.   :1.932   Max.   :4.725     Max.   :109.98  
+##  New.Zealand.Dollar Norwegian.Krone Pakistani.Rupee   Qatar.Riyal  
+##  Min.   :0.3927     Min.   :4.959   Min.   : 30.88   Min.   :3.64  
+##  1st Qu.:0.5790     1st Qu.:6.107   1st Qu.: 51.87   1st Qu.:3.64  
+##  Median :0.6839     Median :6.708   Median : 60.71   Median :3.64  
+##  Mean   :0.6598     Mean   :6.964   Mean   : 70.14   Mean   :3.64  
+##  3rd Qu.:0.7359     3rd Qu.:7.803   3rd Qu.: 90.94   3rd Qu.:3.64  
+##  Max.   :0.8822     Max.   :9.606   Max.   :115.70   Max.   :3.64  
+##    Rial.Omani     Saudi.Arabian.Riyal Singapore.Dollar South.African.Rand
+##  Min.   :0.3845   Min.   :3.745       Min.   :1.201    Min.   : 3.530    
+##  1st Qu.:0.3845   1st Qu.:3.745       1st Qu.:1.361    1st Qu.: 6.218    
+##  Median :0.3845   Median :3.750       Median :1.444    Median : 7.415    
+##  Mean   :0.3845   Mean   :3.749       Mean   :1.503    Mean   : 8.076    
+##  3rd Qu.:0.3845   3rd Qu.:3.750       3rd Qu.:1.688    3rd Qu.: 9.941    
+##  Max.   :0.3845   Max.   :3.750       Max.   :1.851    Max.   :16.771    
+##  Sri.Lanka.Rupee  Swedish.Krona     Swiss.Franc       Thai.Baht    
+##  Min.   : 49.57   Min.   : 5.843   Min.   :0.7253   Min.   :24.44  
+##  1st Qu.: 77.54   1st Qu.: 6.832   1st Qu.:0.9789   1st Qu.:31.57  
+##  Median :103.99   Median : 7.604   Median :1.1936   Median :34.85  
+##  Mean   :102.23   Mean   : 7.731   Mean   :1.2108   Mean   :35.23  
+##  3rd Qu.:126.29   3rd Qu.: 8.376   3rd Qu.:1.3888   3rd Qu.:39.45  
+##  Max.   :157.65   Max.   :10.995   Max.   :1.8228   Max.   :56.06  
+##  Trinidad.And.Tobago.Dollar U.A.E..Dirham   U.K..Pound.Sterling  U.S..Dollar
+##  Min.   :5.839              Min.   :3.671   Min.   :1.213       Min.   :1   
+##  1st Qu.:6.260              1st Qu.:3.672   1st Qu.:1.518       1st Qu.:1   
+##  Median :6.281              Median :3.672   Median :1.599       Median :1   
+##  Mean   :6.309              Mean   :3.672   Mean   :1.615       Mean   :1   
+##  3rd Qu.:6.376              3rd Qu.:3.672   3rd Qu.:1.675       3rd Qu.:1   
+##  Max.   :6.789              Max.   :3.675   Max.   :2.102       Max.   :1</code></pre>
+<pre class="r"><code>summary(goldPricesClean)</code></pre>
+<pre><code>##      Date              USD..AM.          USD..PM.         GBP..AM.      
+##  Length:13585       Min.   :  34.77   Min.   :   0.0   Min.   :  14.48  
+##  Class :character   1st Qu.: 280.50   1st Qu.: 280.3   1st Qu.: 177.63  
+##  Mode  :character   Median : 383.30   Median : 383.4   Median : 234.47  
+##                     Mean   : 575.17   Mean   : 574.9   Mean   : 370.55  
+##                     3rd Qu.: 841.75   3rd Qu.: 841.1   3rd Qu.: 453.91  
+##                     Max.   :2061.50   Max.   :2067.2   Max.   :1574.37  
+##     GBP..PM.        EURO..AM.        EURO..PM.     
+##  Min.   :   0.0   Min.   :   0.0   Min.   :   0.0  
+##  1st Qu.: 177.6   1st Qu.:   0.0   1st Qu.:   0.0  
+##  Median : 234.2   Median :   0.0   Median :   0.0  
+##  Mean   : 370.4   Mean   : 337.4   Mean   : 337.3  
+##  3rd Qu.: 453.8   3rd Qu.: 576.2   3rd Qu.: 576.8  
+##  Max.   :1569.6   Max.   :1743.8   Max.   :1743.4</code></pre>
+<pre class="r"><code>summary(spComposite)</code></pre>
+<pre><code>##      Year           S.P.Composite         Dividend          Earnings       
+##  Length:1810        Min.   :   2.730   Min.   : 0.1800   Min.   :  0.1600  
+##  Class :character   1st Qu.:   7.902   1st Qu.: 0.4202   1st Qu.:  0.5608  
+##  Mode  :character   Median :  17.370   Median : 0.8717   Median :  1.4625  
+##                     Mean   : 327.968   Mean   : 6.7321   Mean   : 15.3714  
+##                     3rd Qu.: 164.400   3rd Qu.: 7.0525   3rd Qu.: 14.7258  
+##                     Max.   :4493.280   Max.   :59.6800   Max.   :158.7400  
+##                                        NA&#39;s   :4         NA&#39;s   :4         
+##       CPI         Long.Interest.Rate   Real.Price     Real.Dividend   
+##  Min.   :  6.28   Min.   : 0.620     Min.   :  73.9   Min.   : 5.445  
+##  1st Qu.: 10.20   1st Qu.: 3.171     1st Qu.: 186.6   1st Qu.: 9.417  
+##  Median : 20.35   Median : 3.815     Median : 283.3   Median :14.411  
+##  Mean   : 62.39   Mean   : 4.504     Mean   : 622.0   Mean   :17.498  
+##  3rd Qu.:102.28   3rd Qu.: 5.139     3rd Qu.: 707.0   3rd Qu.:22.301  
+##  Max.   :273.98   Max.   :15.320     Max.   :4477.2   Max.   :63.511  
+##                                                       NA&#39;s   :4       
+##  Real.Earnings     Cyclically.Adjusted.PE.Ratio
+##  Min.   :  4.576   Min.   : 4.784              
+##  1st Qu.: 14.063   1st Qu.:11.898              
+##  Median : 23.524   Median :16.381              
+##  Mean   : 34.907   Mean   :17.215              
+##  3rd Qu.: 43.768   3rd Qu.:20.913              
+##  Max.   :159.504   Max.   :44.198              
+##  NA&#39;s   :4         NA&#39;s   :120</code></pre>
+<pre class="r"><code>summary(worldDevIndClean)</code></pre>
+<pre><code>##  Country.Name       Country.Code           Year           Series.Name       
+##  Length:2259504     Length:2259504     Length:2259504     Length:2259504    
+##  Class :character   Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+##  Series.Code           Value          
+##  Length:2259504     Length:2259504    
+##  Class :character   Class :character  
+##  Mode  :character   Mode  :character</code></pre>
 </div>
 
 

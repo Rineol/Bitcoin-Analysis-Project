@@ -80,10 +80,20 @@ worldDevIndClean <- worldDevIndAfter %>%
 ## Preparing SP Composite
 ```{r tidy_sp_composite}
 spCompositeClean <- spComposite %>% 
-  mutate(Cyclically.Adjusted.PE.Ratio = ifelse(Year < as.Date("1880-12-31", format="%Y-%m-%d"), 0, Cyclically.Adjusted.PE.Ratio))
+  mutate(Cyclically.Adjusted.PE.Ratio = ifelse(Year < as.Date("1880-12-31", format="%Y-%m-%d"), 0, Cyclically.Adjusted.PE.Ratio)) %>% rename(Date = Year)
 spCompositeClean <- na_ma(spCompositeClean, k = 1)
 
 ```
+
+## Summary
+```{r}
+summary(CurrExchRatesClean)
+summary(goldPricesClean)
+summary(spComposite)
+summary(worldDevIndClean)
+
+```
+
 
 
 
