@@ -70,7 +70,19 @@ goldPricesClean <- na_ma(goldPricesAfter, k = 1)
 ```{r tidy_index}
 worldDevIndAfter <- pivot_longer(worldDevInd, 'X1970..YR1970.':'X2020..YR2020.', names_to = "Year",
 values_to = "Value", values_drop_na = FALSE)
-worldDevIndAfter <- worldDevIndAfter %>% mutate(Year = substr(Year, 2, 5))  %>% filter(!is.na("Series.Name"))
+worldDevIndClean <- worldDevIndAfter %>% 
+  mutate(Year = substr(Year, 2, 5)) %>% 
+  filter(grepl('', Series.Name)) %>%
+  relocate(Year, .after = Country.Code)
+```
+
+
+## Preparing SP Composite
+```{r tidy_sp_composite}
+spCompositeClean <- spComposite %>% 
+  mutate(Cyclically.Adjusted.PE.Ratio = ifelse(Year < as.Date("1880-12-31", format="%Y-%m-%d"), 0, Cyclically.Adjusted.PE.Ratio))
+spCompositeClean <- na_ma(spCompositeClean, k = 1)
+
 ```
 
 
