@@ -17,13 +17,14 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(readxl)
+library(imputeTS)
 ```
 
 
 ## R Wczytywanie danych
 
 
-```{r cars}
+```{r datasets_reading}
 currExchRates <- read.csv("./datasets/CurrencyExchangeRates.csv")
 goldPrices <- read.csv("./datasets/Gold prices.csv")
 spComposite <- read.csv("./datasets/S&P Composite.csv")
@@ -44,8 +45,15 @@ ggplot(btcMkpru, aes(x=Date, y=Value, group = 1)) + geom_line()
 ggplot(btcTrvou, aes(x=Date, y=Value, group = 1)) + geom_line()
 ```
 
+## Preparing Currency Data
+
 ```{r tidy}
-currExchWONA <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
+currExchWithoutNA <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
+currExchAfterEuro <- currExchWithoutNA %>% mutate(
+  r_num = row_number(),
+  Euro = ifelse(r_num %in% 1:992, 0, Euro)) %>%
+  select(-"r_num")
+replacedCurr <- na_ma(currExchAfterEuro, k = 1)
 
 
 ```
