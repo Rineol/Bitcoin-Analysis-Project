@@ -12,6 +12,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ```{r message=FALSE}
 library(dplyr)
 library(tidyr)
@@ -69,15 +70,21 @@ goldPricesClean <- na_ma(goldPricesClean, k = 1)
 ## Preparing World Dev Index
 
 ```{r tidy_index}
+worldDevInd$Series.Name<-gsub("\\$","D",worldDevInd$Series.Name)
+
 worldDevIndClean <- worldDevInd %>% select(-Series.Code) %>% 
   pivot_longer('X1970..YR1970.':'X2020..YR2020.', names_to = "Year", values_to = "Value", values_drop_na = FALSE) %>%
-  pivot_wider(names_from = "Series.Name", values_from = Value)
+  pivot_wider(names_from = "Series.Name", values_from = Value) %>% unchop(everything())
 
 
 worldDevIndClean <- worldDevIndClean %>% 
   mutate(Year = substr(Year, 2, 5)) %>% 
   filter(grepl('', Country.Code)) %>%
   relocate(Year, .after = Country.Code)
+
+
+trial <- as.data.frame(worldDevIndClean)
+trial[is.na(trial)] <- 0
 ```
 
 
@@ -98,14 +105,12 @@ btcHrate <- btcHrate %>% rename(Hrate = Value)
 btcAllClean <- btcTrvou %>% left_join(btcMkpru) %>% left_join(btcHrate) %>% left_join(btcDiff)
 btcAllClean <- na_ma(btcAllClean, k = 1)
 ```
-
-
 ## Summary
 ```{r}
 st(CurrExchRatesClean)
 st(goldPricesClean)
 st(spComposite)
-summary(worldDevIndClean)
+st(trial)
 st(btcAllClean)
 
 ```
