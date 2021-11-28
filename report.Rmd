@@ -86,6 +86,17 @@ spCompositeClean <- na_ma(spCompositeClean, k = 1)
 
 ```
 
+## Preparing Bitcoin Data
+```{r tidy_bitcoin}
+btcTrvou <- btcTrvou %>% rename(Trvou = Value)
+btcMkpru <- btcMkpru %>% rename(Mkpru = Value)
+btcDiff <- btcDiff %>% rename(Diff = Value)
+btcHrate <- btcHrate %>% rename(Hrate = Value)
+btcAllClean <- btcTrvou %>% left_join(btcMkpru) %>% left_join(btcHrate) %>% left_join(btcDiff)
+btcAllClean <- na_ma(btcAllClean, k = 1)
+```
+
+
 ## Summary
 ```{r}
 summary(CurrExchRatesClean)
