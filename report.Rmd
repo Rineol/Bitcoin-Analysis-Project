@@ -28,7 +28,7 @@ library(imputeTS)
 currExchRates <- read.csv("./datasets/CurrencyExchangeRates.csv")
 goldPrices <- read.csv("./datasets/Gold prices.csv")
 spComposite <- read.csv("./datasets/S&P Composite.csv")
-worldDevInd <- read_xlsx("./datasets/World_Development_Indicators.xlsx")
+worldDevInd <- read_excel("./datasets/World_Development_Indicators.xlsx", trim_ws=TRUE)
 worldDevInd <- data.frame(worldDevInd)
 btcMetadata <- read.csv("./datasets/BCHAIN_metadata.csv")
 btcDiff <- read.csv("./datasets/BCHAIN-DIFF.csv")
@@ -49,31 +49,32 @@ ggplot(btcTrvou, aes(x=Date, y=Value, group = 1)) + geom_line()
 ## Preparing Currency Data
 
 ```{r tidy_currency}
-currExchWithoutNA <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
-currExchAfterEuro <- currExchWithoutNA %>% mutate(Euro = ifelse(Date < as.Date("1998-10-30", format="%Y-%m-%d"), 0, Euro))
-CurrExchRatesClean <- na_ma(currExchAfterEuro, k = 1)
+CurrExchRatesClean <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
+CurrExchRatesClean <- CurrExchRatesClean %>% mutate(Euro = ifelse(Date < as.Date("1998-10-30", format="%Y-%m-%d"), 0, Euro))
+CurrExchRatesClean <- na_ma(CurrExchRatesClean, k = 1)
 ```
 
 ## Preparing Gold Prices Data
 
 ```{r tidy_gold}
-goldPricesAfter <- goldPrices %>% mutate(
+goldPricesClean <- goldPrices %>% mutate(
   EURO..AM. = ifelse(Date < as.Date("1998-12-31", format="%Y-%m-%d"), 0, EURO..AM.),
   EURO..PM. = ifelse(Date < as.Date("1998-12-31", format="%Y-%m-%d"), 0, EURO..PM.),
   USD..PM. = ifelse(Date < as.Date("1968-03-14", format="%Y-%m-%d"), 0, USD..PM.),
   GBP..PM. = ifelse(Date < as.Date("1968-03-14", format="%Y-%m-%d"), 0, GBP..PM.))
-goldPricesClean <- na_ma(goldPricesAfter, k = 1)
+goldPricesClean <- na_ma(goldPricesClean, k = 1)
 ```
 
 ## Preparing World Dev Index
 
 ```{r tidy_index}
-worldDevIndAfter <- pivot_longer(worldDevInd, 'X1970..YR1970.':'X2020..YR2020.', names_to = "Year",
+worldDevIndClean <- pivot_longer(worldDevInd, 'X1970..YR1970.':'X2020..YR2020.', names_to = "Year",
 values_to = "Value", values_drop_na = FALSE)
-worldDevIndClean <- worldDevIndAfter %>% 
+worldDevIndClean <- worldDevIndClean %>% 
   mutate(Year = substr(Year, 2, 5)) %>% 
   filter(grepl('', Series.Name)) %>%
   relocate(Year, .after = Country.Code)
+
 ```
 
 
