@@ -18,6 +18,7 @@ library(tidyr)
 library(ggplot2)
 library(readxl)
 library(imputeTS)
+library(vtable)
 ```
 
 
@@ -28,7 +29,7 @@ library(imputeTS)
 currExchRates <- read.csv("./datasets/CurrencyExchangeRates.csv")
 goldPrices <- read.csv("./datasets/Gold prices.csv")
 spComposite <- read.csv("./datasets/S&P Composite.csv")
-worldDevInd <- read_excel("./datasets/World_Development_Indicators.xlsx", trim_ws=TRUE)
+worldDevInd <- read_excel("./datasets/World_Development_Indicators.xlsx", trim_ws=TRUE, na = "..")
 worldDevInd <- data.frame(worldDevInd)
 btcMetadata <- read.csv("./datasets/BCHAIN_metadata.csv")
 btcDiff <- read.csv("./datasets/BCHAIN-DIFF.csv")
@@ -68,13 +69,15 @@ goldPricesClean <- na_ma(goldPricesClean, k = 1)
 ## Preparing World Dev Index
 
 ```{r tidy_index}
-worldDevIndClean <- pivot_longer(worldDevInd, 'X1970..YR1970.':'X2020..YR2020.', names_to = "Year",
-values_to = "Value", values_drop_na = FALSE)
+worldDevIndClean <- worldDevInd %>% select(-Series.Code) %>% 
+  pivot_longer('X1970..YR1970.':'X2020..YR2020.', names_to = "Year", values_to = "Value", values_drop_na = FALSE) %>%
+  pivot_wider(names_from = "Series.Name", values_from = Value)
+
+
 worldDevIndClean <- worldDevIndClean %>% 
   mutate(Year = substr(Year, 2, 5)) %>% 
-  filter(grepl('', Series.Name)) %>%
+  filter(grepl('', Country.Code)) %>%
   relocate(Year, .after = Country.Code)
-
 ```
 
 
@@ -99,10 +102,11 @@ btcAllClean <- na_ma(btcAllClean, k = 1)
 
 ## Summary
 ```{r}
-summary(CurrExchRatesClean)
-summary(goldPricesClean)
-summary(spComposite)
+st(CurrExchRatesClean)
+st(goldPricesClean)
+st(spComposite)
 summary(worldDevIndClean)
+st(btcAllClean)
 
 ```
 
