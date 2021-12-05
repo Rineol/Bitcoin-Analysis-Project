@@ -22,6 +22,8 @@ library(imputeTS)
 library(vtable)
 library(skimr)
 library(DT)
+library(caret)
+library(caret)
 ```
 
 
@@ -115,6 +117,46 @@ st(spComposite)
 st(btcAllClean)
 
 datatable(skim(worldDevIndClean %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
+```
+
+## Model
+```{r model}
+
+set.seed(23)
+
+btcAllClean2 <- btcAllClean %>% select(-Date)
+
+inTraining <- createDataPartition(y = btcAllClean2$Mkpru, p = .70, list = FALSE)
+train <- btcAllClean2[inTraining,]
+valid_and_test  <- btcAllClean2[-inTraining,]
+
+inTesting <- createDataPartition(y = valid_and_test$Mkpru, p = .50, list = FALSE)
+valid <- valid_and_test[ -inTesting,]
+test <- valid_and_test[ inTesting,]
+
+
+ctrl <- trainControl(
+    # powtórzona ocena krzyżowa
+    method = "repeatedcv",
+    # liczba podziałów
+    number = 2,
+    # liczba powtórzeń
+    repeats = 5)
+
+
+fit <- train(Mkpru ~ .,
+             data = train,
+             method = "rf",
+             trControl = ctrl,
+             # Paramter dla algorytmu uczącego
+             ntree = 10)
+
+fit
+
+pred <- predict(fit, newdata = valid_and_test)
+preddf <- data.frame(Pred = pred, Mkpru = valid_and_test$Mkpru)
+
+View(preddf)
 ```
 
 
