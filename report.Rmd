@@ -153,8 +153,8 @@ fit <- train(Mkpru ~ .,
 
 fit
 
-pred <- predict(fit, newdata = valid_and_test)
-preddf <- data.frame(Pred = pred, Mkpru = valid_and_test$Mkpru)
+pred <- predict(fit, newdata = test)
+preddf <- data.frame(Pred = pred, Mkpru = test$Mkpru)
 
 View(preddf)
 ```
