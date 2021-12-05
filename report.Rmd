@@ -20,6 +20,8 @@ library(ggplot2)
 library(readxl)
 library(imputeTS)
 library(vtable)
+library(skimr)
+library(DT)
 ```
 
 
@@ -106,13 +108,13 @@ btcAllClean <- btcTrvou %>% left_join(btcMkpru) %>% left_join(btcHrate) %>% left
 btcAllClean <- na_ma(btcAllClean, k = 1)
 ```
 ## Summary
-```{r}
+```{r basic_summary}
 st(CurrExchRatesClean)
 st(goldPricesClean)
 st(spComposite)
-st(trial)
 st(btcAllClean)
 
+datatable(skim(worldDevIndClean %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
 ```
 
 
