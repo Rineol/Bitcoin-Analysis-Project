@@ -43,16 +43,6 @@ btcMkpru <- read.csv("./datasets/BCHAIN-MKPRU.csv")
 btcTrvou <- read.csv("./datasets/BCHAIN-TRVOU.csv")
 ```
 
-## Bitcoin's data
-
-```{r bitcoin simple}
-ggplot(btcDiff, aes(x=Date, y=Value, group = 1)) + geom_line()
-ggplot(btcHrate, aes(x=Date, y=Value, group = 1)) + geom_line()
-ggplot(btcMkpru, aes(x=Date, y=Value, group = 1)) + geom_line()
-ggplot(btcTrvou, aes(x=Date, y=Value, group = 1)) + geom_line()
-
-```
-
 ## Preparing Currency Data
 
 ```{r tidy_currency}
@@ -78,7 +68,7 @@ goldPricesClean <- na_ma(goldPricesClean, k = 1)
 #https://worldpopulationreview.com/country-rankings/developed-countries
 hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
 
-wdiTop <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
+
 
 worldDevInd$Series.Name<-gsub("\\$","D",worldDevInd$Series.Name)
 
@@ -105,7 +95,9 @@ wdiTop <- trial
 ```{r tidy_sp_composite}
 spCompositeClean <- spComposite %>% 
   mutate(Cyclically.Adjusted.PE.Ratio = ifelse(Year < as.Date("1880-12-31", format="%Y-%m-%d"), 0, Cyclically.Adjusted.PE.Ratio)) %>% rename(Date = Year)
+spCompositeClean <- spCompositeClean%>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 spCompositeClean <- na_ma(spCompositeClean, k = 1)
+
 
 ```
 
@@ -116,8 +108,23 @@ btcMkpru <- btcMkpru %>% rename(Mkpru = Value)
 btcDiff <- btcDiff %>% rename(Diff = Value)
 btcHrate <- btcHrate %>% rename(Hrate = Value)
 btcAllClean <- btcTrvou %>% left_join(btcMkpru) %>% left_join(btcHrate) %>% left_join(btcDiff)
+btcAllClean <- btcAllClean %>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 btcAllClean <- na_ma(btcAllClean, k = 1)
+
 ```
+
+```{r}
+ggplot(btcAllClean, aes(x=Date, y=Trvou, group = 1)) + geom_line()
+ggplot(btcAllClean, aes(x=Date, y=Mkpru, group = 1)) + geom_line()
+ggplot(btcAllClean, aes(x=Date, y=Hrate, group = 1)) + geom_line()
+ggplot(btcAllClean, aes(x=Date, y=Diff, group = 1)) + geom_line()
+
+#btcAllClean <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
+#ggplot(btcAllClean, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_grid(~Param)
+```
+
+
+
 ## Summary
 ```{r basic_summary}
 st(CurrExchRatesClean)
