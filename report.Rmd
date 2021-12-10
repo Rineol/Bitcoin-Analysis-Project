@@ -194,16 +194,32 @@ ggplot(data = spCompositeClean, aes(x = Date, y = S.P.Composite)) +
 
 
 
-## Interesting Corelations
+## Interesting Corelations for Bitcoin's data
 ```{r corelations}
 
-```
+btcPlusSP <- btcAllClean %>% inner_join(spCompositeClean, on='Date')
 
+#cor(btcAllClean$Mkpru, btcAllClean$Hrate,  method = "pearson", use = "complete.obs")
 
+ggscatter(btcAllClean, x = "Mkpru", y = "Hrate", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Mkpru", ylab = "Hrate", color = 'plum4')
 
+#cor(btcPlusSP$Mkpru,btcPlusSP$"S.P.Composite", method = "pearson", use = "complete.obs")
 
-## Animations in Time
-```{r animations}
+ggscatter(btcPlusSP, x = "Mkpru", y = "S.P.Composite", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Mkpru", ylab = "S.P.Composite", color='maroon2')
+
+#cor(btcPlusSP$Mkpru,btcPlusSP$"CPI", method = "pearson", use = "complete.obs")
+
+ggscatter(btcPlusSP, x = "Mkpru", y = "CPI", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Mkpru", ylab = "CPI", color='indianred3')
+
 
 ```
 
