@@ -113,11 +113,14 @@ btcAllClean <- na_ma(btcAllClean, k = 1)
 
 ```
 
-```{r}
-ggplot(btcAllClean, aes(x=Date, y=Trvou, group = 1)) + geom_line()
-ggplot(btcAllClean, aes(x=Date, y=Mkpru, group = 1)) + geom_line()
-ggplot(btcAllClean, aes(x=Date, y=Hrate, group = 1)) + geom_line()
-ggplot(btcAllClean, aes(x=Date, y=Diff, group = 1)) + geom_line()
+```{r bitcoin_graphs}
+ggplot(btcAllClean, aes(x=Date, y=Trvou, group = 1)) + geom_line() + transition_reveal(Date)
+ggplot(btcAllClean, aes(x=Date, y=Mkpru, group = 1)) + geom_line() + transition_reveal(Date)
+ggplot(btcAllClean, aes(x=Date, y=Hrate, group = 1)) + geom_line() + transition_reveal(Date)
+ggplot(btcAllClean, aes(x=Date, y=Diff, group = 1)) + geom_line() + transition_reveal(Date)
+
+
+
 
 #btcAllClean <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
 #ggplot(btcAllClean, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_grid(~Param)
@@ -135,8 +138,8 @@ st(btcAllClean)
 datatable(skim(worldDevIndClean %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
 ```
 
-## Interesting Corelations
-```{r corelations}
+## Attributes analysis
+```{r attr_analysis}
 
 #https://worldpopulationreview.com/country-rankings/developed-countries
 hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
@@ -171,6 +174,13 @@ ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current U
     geom_bar(stat = "identity") + coord_flip()
 
 ```
+
+## Interesting Corelations
+```{r corelations}
+
+```
+
+
 
 
 ## Animations in Time
