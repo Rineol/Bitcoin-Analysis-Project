@@ -89,7 +89,7 @@ worldDevIndClean <- worldDevIndClean %>%
 
 
 trial <- as.data.frame(worldDevIndClean)
-trial <- trial %>% select(which(colMeans(is.na(.)) < 0.2))
+trial <- trial %>% select(which(colMeans(is.na(.)) < 0.3))
 trial[is.na(trial)] <- 0
 worldDevIndClean <- trial
 ```
@@ -126,10 +126,37 @@ datatable(skim(worldDevIndClean %>% dplyr::select(-Country.Name, -Country.Code, 
 ```{r corelations}
 
 #https://worldpopulationreview.com/country-rankings/developed-countries
-hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Liechtenstein', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain')
+hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
 
 wdiTop <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
-View(wdiTop)
+
+
+#example2019 <- wdiTop %>% filter(Year == 2019) %>% select(-Year) %>% pivot_longer(cols='Urban population growth (annual %)':'Birth rate, #crude (per 1,000 people)', names_to = 'Indicator', values_to = 'Value')
+#ggplot(data = example2019, aes(x = Country.Name, y = Value, fill=as.factor(Country.Name))) + facet_grid(Indicator ~ .) +
+#    geom_bar(stat = "identity") + coord_flip()
+
+example2019 <- wdiTop %>% filter(Year == 2019)
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Trade (% of GDP)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Population, total`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Net primary income (Net income from abroad) (current USD)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Birth rate, crude (per 1,000 people)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
+ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current USD)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip()
+
 ```
 
 
