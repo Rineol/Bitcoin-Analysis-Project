@@ -75,6 +75,11 @@ goldPricesClean <- na_ma(goldPricesClean, k = 1)
 ## Preparing World Dev Index
 
 ```{r tidy_index}
+#https://worldpopulationreview.com/country-rankings/developed-countries
+hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
+
+wdiTop <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
+
 worldDevInd$Series.Name<-gsub("\\$","D",worldDevInd$Series.Name)
 
 worldDevIndClean <- worldDevInd %>% select(-Series.Code) %>% 
@@ -89,9 +94,10 @@ worldDevIndClean <- worldDevIndClean %>%
 
 
 trial <- as.data.frame(worldDevIndClean)
-trial <- trial %>% select(which(colMeans(is.na(.)) < 0.3))
+trial <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
+trial <- trial %>% select(which(colMeans(is.na(.)) < 0.20))
 trial[is.na(trial)] <- 0
-worldDevIndClean <- trial
+wdiTop <- trial
 ```
 
 
