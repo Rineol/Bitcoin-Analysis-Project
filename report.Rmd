@@ -118,16 +118,9 @@ btcAllClean <- na_ma(btcAllClean, k = 1)
 ```
 
 ```{r bitcoin_graphs}
-ggplot(btcAllClean, aes(x=Date, y=Trvou, group = 1)) + geom_line()
-ggplot(btcAllClean, aes(x=Date, y=Mkpru, group = 1)) + geom_line() 
-ggplot(btcAllClean, aes(x=Date, y=Hrate, group = 1)) + geom_line()
-ggplot(btcAllClean, aes(x=Date, y=Diff, group = 1)) + geom_line()
 
-
-
-
-#btcAllClean <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
-#ggplot(btcAllClean, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_grid(~Param)
+btcAnalysis <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
+ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y")
 ```
 
 
@@ -150,25 +143,25 @@ datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>
 example2019 <- wdiTop %>% filter(Year == 2019)
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 1')
+    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 1') + theme_minimal()
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Trade (% of GDP)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 2')
+    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 2') + theme_minimal()
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Population, total`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Net primary income (Net income from abroad) (current USD)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Birth rate, crude (per 1,000 people)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current USD)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
 
 ```
 
@@ -176,13 +169,26 @@ ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current U
 
 GoldAnalysis <- goldPricesClean %>% pivot_longer(cols = 'USD..AM.':'EURO..PM.', names_to = 'Curr', values_to = 'Value')
 ggplot(data = GoldAnalysis, aes(x = Date, y = Value, color=as.factor(Curr))) +
-    geom_point(size=0.1) + facet_wrap(~Curr)
+    geom_point(size=0.1) + facet_wrap(~Curr) + theme_minimal()
 
 ```
-```{r attr_analysis_spcomposite}
+```{r attr_analysis_spcomposite, echo=FALSE, message=FALSE, warning=FALSE}
+spAnalysis <- spCompositeClean %>% pivot_longer(cols='S.P.Composite':'Cyclically.Adjusted.PE.Ratio', values_to = 'Value', names_to = 'Param')
+
+earn <- spAnalysis %>% filter(Param %in% c('Earnings', 'Real.Earnings'))
+ggplot(data = earn, aes(x = Date, y = Value, color=as.factor(Param))) +
+    geom_line() + facet_wrap(~Param) + theme_minimal() + transition_reveal(Date)
 
 
-
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+earn <- spAnalysis %>% filter(Param %in% c('Dividend', 'Real.Dividend'))
+ggplot(data = earn, aes(x = Date, y = Value, color=as.factor(Param))) +
+    geom_line() + facet_wrap(~Param) + theme_minimal() + transition_reveal(Date)
+```
+```{r}
+ggplot(data = spCompositeClean, aes(x = Date, y = S.P.Composite)) +
+    geom_line(color='blue') + theme_minimal() + transition_reveal(Date)
 ```
 
 
