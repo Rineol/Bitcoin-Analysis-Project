@@ -25,6 +25,7 @@ library(DT)
 library(caret)
 library(gganimate)
 library(patchwork)
+library("ggpubr")
 ```
 
 
@@ -120,7 +121,7 @@ btcAllClean <- na_ma(btcAllClean, k = 1)
 ```{r bitcoin_graphs}
 
 btcAnalysis <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
-ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y")
+ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y") + theme_minimal()
 ```
 
 
