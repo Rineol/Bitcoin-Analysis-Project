@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -24,13 +24,14 @@ library(skimr)
 library(DT)
 library(caret)
 library(gganimate)
+library(patchwork)
 ```
 
 
 ## R Wczytywanie danych
 
 
-```{r datasets_reading}
+```{r datasets_reading, message=FALSE, warning=FALSE}
 currExchRates <- read.csv("./datasets/CurrencyExchangeRates.csv")
 goldPrices <- read.csv("./datasets/Gold prices.csv")
 spComposite <- read.csv("./datasets/S&P Composite.csv")
@@ -48,6 +49,7 @@ btcTrvou <- read.csv("./datasets/BCHAIN-TRVOU.csv")
 ```{r tidy_currency}
 CurrExchRatesClean <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
 CurrExchRatesClean <- CurrExchRatesClean %>% mutate(Euro = ifelse(Date < as.Date("1998-10-30", format="%Y-%m-%d"), 0, Euro))
+CurrExchRatesClean <- CurrExchRatesClean %>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 CurrExchRatesClean <- na_ma(CurrExchRatesClean, k = 1)
 ```
 
@@ -59,6 +61,8 @@ goldPricesClean <- goldPrices %>% mutate(
   EURO..PM. = ifelse(Date < as.Date("1998-12-31", format="%Y-%m-%d"), 0, EURO..PM.),
   USD..PM. = ifelse(Date < as.Date("1968-03-14", format="%Y-%m-%d"), 0, USD..PM.),
   GBP..PM. = ifelse(Date < as.Date("1968-03-14", format="%Y-%m-%d"), 0, GBP..PM.))
+
+goldPricesClean <- goldPricesClean %>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 goldPricesClean <- na_ma(goldPricesClean, k = 1)
 ```
 
@@ -114,10 +118,10 @@ btcAllClean <- na_ma(btcAllClean, k = 1)
 ```
 
 ```{r bitcoin_graphs}
-ggplot(btcAllClean, aes(x=Date, y=Trvou, group = 1)) + geom_line() + transition_reveal(Date)
-ggplot(btcAllClean, aes(x=Date, y=Mkpru, group = 1)) + geom_line() + transition_reveal(Date)
-ggplot(btcAllClean, aes(x=Date, y=Hrate, group = 1)) + geom_line() + transition_reveal(Date)
-ggplot(btcAllClean, aes(x=Date, y=Diff, group = 1)) + geom_line() + transition_reveal(Date)
+ggplot(btcAllClean, aes(x=Date, y=Trvou, group = 1)) + geom_line()
+ggplot(btcAllClean, aes(x=Date, y=Mkpru, group = 1)) + geom_line() 
+ggplot(btcAllClean, aes(x=Date, y=Hrate, group = 1)) + geom_line()
+ggplot(btcAllClean, aes(x=Date, y=Diff, group = 1)) + geom_line()
 
 
 
@@ -135,28 +139,21 @@ st(goldPricesClean)
 st(spComposite)
 st(btcAllClean)
 
-datatable(skim(worldDevIndClean %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
+datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
 ```
 
 ## Attributes analysis
-```{r attr_analysis}
+```{r attr_analysis_wdi, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
 
 #https://worldpopulationreview.com/country-rankings/developed-countries
-hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
-
-wdiTop <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
-
-
-#example2019 <- wdiTop %>% filter(Year == 2019) %>% select(-Year) %>% pivot_longer(cols='Urban population growth (annual %)':'Birth rate, #crude (per 1,000 people)', names_to = 'Indicator', values_to = 'Value')
-#ggplot(data = example2019, aes(x = Country.Name, y = Value, fill=as.factor(Country.Name))) + facet_grid(Indicator ~ .) +
-#    geom_bar(stat = "identity") + coord_flip()
 
 example2019 <- wdiTop %>% filter(Year == 2019)
+
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 1')
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Trade (% of GDP)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip()
+    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 2')
 
 ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip()
@@ -174,6 +171,21 @@ ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current U
     geom_bar(stat = "identity") + coord_flip()
 
 ```
+
+```{r attr_analysis_gold}
+
+GoldAnalysis <- goldPricesClean %>% pivot_longer(cols = 'USD..AM.':'EURO..PM.', names_to = 'Curr', values_to = 'Value')
+ggplot(data = GoldAnalysis, aes(x = Date, y = Value, color=as.factor(Curr))) +
+    geom_point(size=0.1) + facet_wrap(~Curr)
+
+```
+```{r attr_analysis_spcomposite}
+
+
+
+```
+
+
 
 ## Interesting Corelations
 ```{r corelations}
