@@ -23,7 +23,7 @@ library(vtable)
 library(skimr)
 library(DT)
 library(caret)
-library(caret)
+library(gganimate)
 ```
 
 
@@ -50,6 +50,7 @@ ggplot(btcDiff, aes(x=Date, y=Value, group = 1)) + geom_line()
 ggplot(btcHrate, aes(x=Date, y=Value, group = 1)) + geom_line()
 ggplot(btcMkpru, aes(x=Date, y=Value, group = 1)) + geom_line()
 ggplot(btcTrvou, aes(x=Date, y=Value, group = 1)) + geom_line()
+
 ```
 
 ## Preparing Currency Data
@@ -88,7 +89,9 @@ worldDevIndClean <- worldDevIndClean %>%
 
 
 trial <- as.data.frame(worldDevIndClean)
+trial <- trial %>% select(which(colMeans(is.na(.)) < 0.2))
 trial[is.na(trial)] <- 0
+worldDevIndClean <- trial
 ```
 
 
@@ -118,6 +121,24 @@ st(btcAllClean)
 
 datatable(skim(worldDevIndClean %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
 ```
+
+## Interesting Corelations
+```{r corelations}
+
+#https://worldpopulationreview.com/country-rankings/developed-countries
+hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Liechtenstein', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain')
+
+wdiTop <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
+View(wdiTop)
+```
+
+
+## Animations in Time
+```{r animations}
+
+```
+
+
 
 ## Model
 ```{r model}
