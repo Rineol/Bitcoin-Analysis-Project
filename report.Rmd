@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-libraries <- c("dplyr", "tidyr", "ggplot2", "readxl", "imputeTS", "vtable", "skimr", "DT", "caret", "gganimate", "patchwork", "ggpubr") 
+libraries <- c("dplyr", "tidyr", "ggplot2", "readxl", "imputeTS", "vtable", "skimr", "DT", "caret", "gganimate", "patchwork", "ggpubr", "effects") 
 
 r = getOption("repos")
 r["CRAN"] = "http://cran.us.r-project.org"
@@ -173,6 +173,7 @@ for(i in colNames){
 
 
 ```
+
 ### Bitcoins
 ```{r bitcoin_graphs}
 
@@ -324,7 +325,13 @@ fit
 pred <- predict(fit, newdata = test)
 preddf <- data.frame(Pred = pred, Mkpru = test$Mkpru)
 
-View(preddf)
+#View(preddf)
+
+print(ggscatter(preddf, x = "Mkpru", y = "Pred",
+           
+           xlab = "Mkpru", ylab = "Predicted Mkpru", color='maroon1') + geom_smooth())
+
+
 ```
 
 
