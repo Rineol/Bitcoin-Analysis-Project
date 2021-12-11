@@ -29,7 +29,7 @@ library("ggpubr")
 ```
 
 
-## R Wczytywanie danych
+## Data Reading
 
 
 ```{r datasets_reading, message=FALSE, warning=FALSE}
@@ -103,7 +103,6 @@ spCompositeClean <- spComposite %>%
 spCompositeClean <- spCompositeClean%>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 spCompositeClean <- na_ma(spCompositeClean, k = 1)
 
-
 ```
 
 ## Preparing Bitcoin Data
@@ -121,7 +120,7 @@ btcAllClean <- na_ma(btcAllClean, k = 1)
 ```{r bitcoin_graphs}
 
 btcAnalysis <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
-ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y") + theme_minimal()
+ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y") + theme_minimal() + labs(colour = "Bitcoin's Parameter", title = "Bitcoin's Overview")
 ```
 
 
@@ -133,7 +132,7 @@ st(goldPricesClean)
 st(spComposite)
 st(btcAllClean)
 
-datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100))
+datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100) %>% dplyr::rename(Variable=skim_variable, Mean=numeric.mean, "Std. Dev."=numeric.sd, Min=numeric.p0, "Pctl. 25"=numeric.p25, "Pctl. 75"=numeric.p75, Max=numeric.p100))
 ```
 
 ## Attributes analysis
@@ -170,7 +169,7 @@ ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current U
 
 GoldAnalysis <- goldPricesClean %>% pivot_longer(cols = 'USD..AM.':'EURO..PM.', names_to = 'Curr', values_to = 'Value')
 ggplot(data = GoldAnalysis, aes(x = Date, y = Value, color=as.factor(Curr))) +
-    geom_point(size=0.1) + facet_wrap(~Curr) + theme_minimal()
+    geom_point(size=0.1) + facet_wrap(~Curr) + theme_minimal() + labs(color='Currency', title='Gold Prices\' Overview')
 
 ```
 ```{r attr_analysis_spcomposite, echo=FALSE, message=FALSE, warning=FALSE}
@@ -198,6 +197,7 @@ ggplot(data = spCompositeClean, aes(x = Date, y = S.P.Composite)) +
 ```{r corelations}
 
 btcPlusSP <- btcAllClean %>% inner_join(spCompositeClean, on='Date')
+btcPlusGold <- btcAllClean %>% inner_join(goldPricesClean, on='Date')
 
 #cor(btcAllClean$Mkpru, btcAllClean$Hrate,  method = "pearson", use = "complete.obs")
 
@@ -219,6 +219,12 @@ ggscatter(btcPlusSP, x = "Mkpru", y = "CPI",
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Mkpru", ylab = "CPI", color='indianred3')
+
+
+# ggscatter(btcPlusGold, x = "Mkpru", y = "USD..AM.", 
+#           add = "reg.line", conf.int = TRUE, 
+#           cor.coef = TRUE, cor.method = "pearson",
+#           xlab = "Mkpru", ylab = "USD..AM.", color='coral2')
 
 
 ```
