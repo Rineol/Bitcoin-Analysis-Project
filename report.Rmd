@@ -1,7 +1,7 @@
 ---
 title: "report"
 author: "Julia Chałasiak"
-date: "20 11 2021"
+date: "`r format(Sys.time(), '%d/%m/%y')`"
 output:
   html_document:
     toc: true
@@ -12,6 +12,10 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Extended Summary
+
+## Libraries Loading
 
 ```{r message=FALSE, warning=FALSE}
 library(dplyr)
@@ -25,11 +29,11 @@ library(DT)
 library(caret)
 library(gganimate)
 library(patchwork)
-library("ggpubr")
+library(ggpubr)
 ```
 
 
-## Data Reading
+## Datasets Reading
 
 
 ```{r datasets_reading, message=FALSE, warning=FALSE}
@@ -45,16 +49,20 @@ btcMkpru <- read.csv("./datasets/BCHAIN-MKPRU.csv")
 btcTrvou <- read.csv("./datasets/BCHAIN-TRVOU.csv")
 ```
 
-## Preparing Currency Data
+## Datasets Preparation
+
+### Currency Exchange Rates
 
 ```{r tidy_currency}
 CurrExchRatesClean <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
 CurrExchRatesClean <- CurrExchRatesClean %>% mutate(Euro = ifelse(Date < as.Date("1998-10-30", format="%Y-%m-%d"), 0, Euro))
 CurrExchRatesClean <- CurrExchRatesClean %>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 CurrExchRatesClean <- na_ma(CurrExchRatesClean, k = 1)
+
+st(CurrExchRatesClean)
 ```
 
-## Preparing Gold Prices Data
+### Gold Prices
 
 ```{r tidy_gold}
 goldPricesClean <- goldPrices %>% mutate(
@@ -65,15 +73,15 @@ goldPricesClean <- goldPrices %>% mutate(
 
 goldPricesClean <- goldPricesClean %>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 goldPricesClean <- na_ma(goldPricesClean, k = 1)
+
+st(goldPricesClean)
 ```
 
-## Preparing World Dev Index
+### World Development Index and Top Chosen Countries
 
-```{r tidy_index}
+```{r tidy_index, warning=FALSE}
 #https://worldpopulationreview.com/country-rankings/developed-countries
 hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
-
-
 
 worldDevInd$Series.Name<-gsub("\\$","D",worldDevInd$Series.Name)
 
@@ -93,20 +101,22 @@ trial <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
 trial <- trial %>% select(which(colMeans(is.na(.)) < 0.20))
 trial[is.na(trial)] <- 0
 wdiTop <- trial
+
+datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100) %>% dplyr::rename(Variable=skim_variable, Mean=numeric.mean, "Std. Dev."=numeric.sd, Min=numeric.p0, "Pctl. 25"=numeric.p25, "Pctl. 75"=numeric.p75, Max=numeric.p100))
 ```
 
-
-## Preparing SP Composite
+### S.P. Composite
 ```{r tidy_sp_composite}
 spCompositeClean <- spComposite %>% 
   mutate(Cyclically.Adjusted.PE.Ratio = ifelse(Year < as.Date("1880-12-31", format="%Y-%m-%d"), 0, Cyclically.Adjusted.PE.Ratio)) %>% rename(Date = Year)
 spCompositeClean <- spCompositeClean%>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 spCompositeClean <- na_ma(spCompositeClean, k = 1)
 
+st(spComposite)
 ```
 
-## Preparing Bitcoin Data
-```{r tidy_bitcoin}
+### Bitcoins' Data
+```{r tidy_bitcoin, echo=TRUE, message=FALSE, warning=FALSE}
 btcTrvou <- btcTrvou %>% rename(Trvou = Value)
 btcMkpru <- btcMkpru %>% rename(Mkpru = Value)
 btcDiff <- btcDiff %>% rename(Diff = Value)
@@ -115,6 +125,7 @@ btcAllClean <- btcTrvou %>% left_join(btcMkpru) %>% left_join(btcHrate) %>% left
 btcAllClean <- btcAllClean %>% mutate(Date = as.Date(Date, format= "%Y-%m-%d"))
 btcAllClean <- na_ma(btcAllClean, k = 1)
 
+st(btcAllClean)
 ```
 
 ```{r bitcoin_graphs}
@@ -123,17 +134,6 @@ btcAnalysis <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Par
 ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y") + theme_minimal() + labs(colour = "Bitcoin's Parameter", title = "Bitcoin's Overview")
 ```
 
-
-
-## Summary
-```{r basic_summary}
-st(CurrExchRatesClean)
-st(goldPricesClean)
-st(spComposite)
-st(btcAllClean)
-
-datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>% dplyr::select(skim_variable, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p75, numeric.p100) %>% dplyr::rename(Variable=skim_variable, Mean=numeric.mean, "Std. Dev."=numeric.sd, Min=numeric.p0, "Pctl. 25"=numeric.p25, "Pctl. 75"=numeric.p75, Max=numeric.p100))
-```
 
 ## Attributes analysis
 ```{r attr_analysis_wdi, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
