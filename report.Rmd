@@ -243,8 +243,8 @@ btcPlusCountry <- btcYearsSummary %>% inner_join(wdiTop, on='Year')
 
 for (country in hdiTop) {
   countryExample <- btcPlusCountry %>% filter(Country.Name == country)
-  # check <- cor(x = countryExample$MeanMkpru, y = countryExample$`GDP per capita (current USD)`, method = "pearson", use = "complete.obs")
-  #if (check < 0.6) {next}
+  check <- cor(x = countryExample$MeanMkpru, y = countryExample$`GDP per capita (current USD)`, method = "pearson", use = "everything")
+  if (check < 0.6 | is.na(check)) {next}
   print(ggscatter(countryExample, x = "MeanMkpru", y = "GDP per capita (current USD)", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
