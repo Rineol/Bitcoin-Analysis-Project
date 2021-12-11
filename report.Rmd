@@ -78,7 +78,11 @@ st(goldPricesClean)
 
 ```{r tidy_index, warning=FALSE}
 #https://worldpopulationreview.com/country-rankings/developed-countries
+#http://hdr.undp.org/en/content/latest-human-development-index-ranking
+
 hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
+
+
 
 worldDevInd$Series.Name<-gsub("\\$","D",worldDevInd$Series.Name)
 
@@ -95,7 +99,12 @@ worldDevIndClean <- worldDevIndClean %>%
 
 trial <- as.data.frame(worldDevIndClean)
 trial <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
+
+#trial <- trial %>% filter(Year==2020) %>% arrange(`GDP (current USD)`) 
+
 trial <- trial %>% select(which(colMeans(is.na(.)) < 0.20))
+
+
 trial[is.na(trial)] <- 0
 wdiTop <- trial
 
@@ -129,6 +138,7 @@ st(btcAllClean)
 
 btcAnalysis <- btcAllClean %>% pivot_longer(cols='Trvou':'Diff', names_to = 'Param', values_to = 'Value')
 ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line() + facet_wrap(~Param, scales = "free_y") + theme_minimal() + labs(colour = "Bitcoin's Parameter", title = "Bitcoin's Overview")
+
 ```
 
 
@@ -137,26 +147,26 @@ ggplot(btcAnalysis, aes(x=Date, y=Value, color = as.factor(Param))) + geom_line(
 
 #https://worldpopulationreview.com/country-rankings/developed-countries
 
-example2019 <- wdiTop %>% filter(Year == 2019)
+example <- wdiTop %>% filter(Year == 2019)
 
-ggplot(data = example2019, aes(x = Country.Name, y =`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
+ggplot(data = example, aes(x = Country.Name, y =`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = `Trade (% of GDP)`, fill=as.factor(Country.Name))) +
+ggplot(data = example, aes(x = Country.Name, y = `Trade (% of GDP)`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = `Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
+ggplot(data = example, aes(x = Country.Name, y = `Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = `Population, total`, fill=as.factor(Country.Name))) +
+ggplot(data = example, aes(x = Country.Name, y = `Population, total`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = `Net primary income (Net income from abroad) (current USD)`, fill=as.factor(Country.Name))) + geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
+ggplot(data = example, aes(x = Country.Name, y = `Net primary income (Net income from abroad) (current USD)`, fill=as.factor(Country.Name))) + geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = `Birth rate, crude (per 1,000 people)`, fill=as.factor(Country.Name))) +
+ggplot(data = example, aes(x = Country.Name, y = `Birth rate, crude (per 1,000 people)`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = `GDP (current USD)`, fill=as.factor(Country.Name))) +
+ggplot(data = example, aes(x = Country.Name, y = `GDP (current USD)`, fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
 ```
@@ -186,44 +196,64 @@ ggplot(data = earn, aes(x = Date, y = Value, color=as.factor(Param))) +
 ggplot(data = spCompositeClean, aes(x = Date, y = S.P.Composite)) +
     geom_line(color='blue') + theme_minimal() + labs(title='S.P.Composite through Years') + transition_reveal(Date)
 ```
+## Correlations
 
-
-
-## Interesting Corelations for Bitcoin's data
-```{r corelations}
-
+### Correlation between Hrate and Mkpru
+```{r}
 btcPlusSP <- btcAllClean %>% inner_join(spCompositeClean, on='Date')
 btcPlusGold <- btcAllClean %>% inner_join(goldPricesClean, on='Date')
 
-#cor(btcAllClean$Mkpru, btcAllClean$Hrate,  method = "pearson", use = "complete.obs")
 
 ggscatter(btcAllClean, x = "Mkpru", y = "Hrate", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Mkpru", ylab = "Hrate", color = 'plum4')
+```
 
-#cor(btcPlusSP$Mkpru,btcPlusSP$"S.P.Composite", method = "pearson", use = "complete.obs")
+
+
+### Correlations for Bitcoins' Data Including S.P. Composite
+```{r corelations}
+
 
 ggscatter(btcPlusSP, x = "Mkpru", y = "S.P.Composite", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Mkpru", ylab = "S.P.Composite", color='maroon2')
 
-#cor(btcPlusSP$Mkpru,btcPlusSP$"CPI", method = "pearson", use = "complete.obs")
-
 ggscatter(btcPlusSP, x = "Mkpru", y = "CPI", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Mkpru", ylab = "CPI", color='indianred3')
 
+ggscatter(btcPlusSP, x = "Mkpru", y = "Earnings", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Mkpru", ylab = "Earnings", color='coral2')
 
-# ggscatter(btcPlusGold, x = "Mkpru", y = "USD..AM.", 
-#           add = "reg.line", conf.int = TRUE, 
-#           cor.coef = TRUE, cor.method = "pearson",
-#           xlab = "Mkpru", ylab = "USD..AM.", color='coral2')
+```
+
+### Correlations for Bitcoins' Data Including Arbitrally Chosen Indexes from WDI
+```{r}
+
+
+btcYearsSummary <- btcAllClean %>% mutate(Year = format(as.Date(Date, format="%d/%m/%Y"),"%Y")) %>% select(-Date) %>% group_by(Year) %>% dplyr::summarize(MeanDiff = mean(Diff), MeanHrate=mean(Hrate), MeanMkpru=mean(Mkpru), MeanTrvou=mean(Trvou)) %>% filter(Year > 2008 & Year <2021)
+
+btcPlusCountry <- btcYearsSummary %>% inner_join(wdiTop, on='Year') 
+
+for (country in hdiTop) {
+  countryExample <- btcPlusCountry %>% filter(Country.Name == country)
+  # check <- cor(x = countryExample$MeanMkpru, y = countryExample$`GDP per capita (current USD)`, method = "pearson", use = "complete.obs")
+  #if (check < 0.6) {next}
+  print(ggscatter(countryExample, x = "MeanMkpru", y = "GDP per capita (current USD)", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "MeanMkpru", ylab = "GDP per capita (current USD)", color='orchid2', title = country))
+}
 
 
 ```
+
 
 
 
