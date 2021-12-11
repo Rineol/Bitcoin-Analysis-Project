@@ -15,21 +15,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Extended Summary
 
-## Libraries Loading
 
-```{r message=FALSE, warning=FALSE}
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(readxl)
-library(imputeTS)
-library(vtable)
-library(skimr)
-library(DT)
-library(caret)
-library(gganimate)
-library(patchwork)
-library(ggpubr)
+```{r message=FALSE, warning=FALSE, include=FALSE}
+libraries <- c("dplyr", "tidyr", "ggplot2", "readxl", "imputeTS", "vtable", "skimr", "DT", "caret", "gganimate", "patchwork", "ggpubr") 
+
+r = getOption("repos")
+r["CRAN"] = "http://cran.us.r-project.org"
+options(repos = r)
+
+for (l in libraries) {
+  if (!require(l)) install.packages(l); library(l, character.only = TRUE)
+}
+
 ```
 
 
