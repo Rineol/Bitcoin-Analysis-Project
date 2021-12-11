@@ -148,12 +148,26 @@ st(btcAllClean)
 
 #https://worldpopulationreview.com/country-rankings/developed-countries
 
-example <- wdiTop %>% filter(Year == 2019)
+chosenIndicators <- wdiTop %>% dplyr::select(-`Total greenhouse gas emissions (kt of CO2 equivalent)`,
+                                    -`Survival to age 65, female (% of cohort)`,
+                                    -`Survival to age 65, male (% of cohort)`,
+                                    -`Primary school starting age (years)`,
+                                    -`Population, male (% of total population)`,
+                                    -`Population, female (% of total population)`,
+                                    -`Population, female`,
+                                    -`Population, male`,
+                                    -`Nitrous oxide emissions (thousand metric tons of CO2 equivalent)`,
+                                    -`Methane emissions (kt of CO2 equivalent)`,
+                                    -`Methane emissions in energy sector (thousand metric tons of CO2 equivalent)`,
+                                    -`CO2 emissions (metric tons per capita)`,
+                                    -`CO2 emissions (kt)`
+                                    
+                                    )  %>% filter(Year == 2019) 
 
 #parametersWdiTop <- c("Urban population growth (annual %)")
-colNames <- names(example)[4:53]
+colNames <- names(chosenIndicators)[4:40]
 for(i in colNames){
-  print(ggplot(data = example, aes(x = Country.Name, y =.data[[i]], fill=as.factor(Country.Name))) +
+  print(ggplot(data = chosenIndicators, aes(x = Country.Name, y =.data[[i]], fill=as.factor(Country.Name))) +
     geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country'))
 }
 
@@ -248,8 +262,8 @@ btcPlusCountry <- btcYearsSummary %>% inner_join(wdiTop, on='Year')
 
 for (country in hdiTop) {
   countryExample <- btcPlusCountry %>% filter(Country.Name == country)
-  check <- cor(x = countryExample$MeanMkpru, y = countryExample$`GDP per capita (current USD)`, method = "pearson")
-  if (check < 0.6 | is.na(check)) {next}
+  check <- cor(x = countryExample$MeanMkpru, y = countryExample$`GDP per capita (current USD)`, method = "pearson", use = "everything")
+  if (check < 0.7 | is.na(check)) {next}
   print(ggscatter(countryExample, x = "MeanMkpru", y = "GDP per capita (current USD)", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
@@ -257,6 +271,18 @@ for (country in hdiTop) {
 }
 
 ```
+```{r}
+for (country in hdiTop) {
+  countryExample <- btcPlusCountry %>% filter(Country.Name == country)
+  check <- cor(x = countryExample$MeanMkpru, y = countryExample$`Urban population growth (annual %)`, method = "pearson", use = "everything")
+  if (check < 0.7 | is.na(check)) {next}
+  print(ggscatter(countryExample, x = "MeanMkpru", y = "Urban population growth (annual %)", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "MeanMkpru", ylab = "Urban population growth (annual %)", color='maroon1', title = country))
+}
+```
+
 
 
 
