@@ -1,5 +1,5 @@
 ---
-title: "report"
+title: "Analyzing World Dev. Indicators for Top 24 HDI countries & Bitcons' Predictions"
 author: "Julia Chałasiak"
 date: "`r format(Sys.time(), '%d/%m/%y')`"
 output:
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Extended Summary
-On of the most known measures for ranking countries is HDI - Human Development Index.  It takes into account: life expectancy at birth (in years), expected years of schooling, mean years of schooling and gross national income per capita. In this report we decided to choose top 24 countries from Latest Human Development Index Ranking and take a closer look at additional information from World Development Indicators in their context. Moreover, we tried to find correlations between Bitcoins' data from 2009 to 2021 and S.P.Composite dataset. Finally, short-term prediction for Bitcoin Market Price USD was made. 
+On of the most known measures for ranking countries is HDI - Human Development Index.  It takes into account: life expectancy at birth (in years), expected years of schooling, mean years of schooling and gross national income per capita. In this report we decided to choose top 24 countries from Latest Human Development Index Ranking and take a closer look at additional information from World Development Indicators in their context. Moreover, we tried to find correlations between Bitcoins' data from 2009 to 2021, S.P.Composite dataset and some of the mentioned countries. Finally, short-term prediction for Bitcoin Market Price USD was made. 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 libraries <- c("dplyr", "tidyr", "ggplot2", "readxl", "imputeTS", "vtable", "skimr", "DT", "caret", "gganimate", "ggpubr") 
@@ -126,6 +126,13 @@ st(spComposite)
 ```
 
 ### Bitcoins' Data
+We read four datasets containing information about Bitcoins: 
+Trvou - Bitcoin USD Exchange Trade Volume,
+Mkpru - Bitcoin Market Price USD,
+Diff - Bitcoin Difficulty,
+Hrate - Bitcoin Hash Rate,
+and decided to gather them into one large set:
+
 ```{r tidy_bitcoin, echo=TRUE, message=FALSE, warning=FALSE}
 btcTrvou <- btcTrvou %>% rename(Trvou = Value)
 btcMkpru <- btcMkpru %>% rename(Mkpru = Value)
@@ -140,17 +147,16 @@ st(btcAllClean)
 
 
 ## Attributes analysis
+In this section we focused mainly on indicators for chosen countries. Later we presented overviews for Bitcoins, Gold Prices and animations for S.P. Composite.
 ```{r}
 
 ```
 
 
 ### World Development Index - Top Chosen based on HDI
+We focused on indicators from 2019 because the HDI rank included HDI values from 2019.
 
 ```{r attr_analysis_wdi, echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
-
-
-#https://worldpopulationreview.com/country-rankings/developed-countries
 
 chosenIndicators <- wdiTop %>% dplyr::select(-`Total greenhouse gas emissions (kt of CO2 equivalent)`,
                                     -`Survival to age 65, female (% of cohort)`,
@@ -217,13 +223,14 @@ ggplot(data = spCompositeClean, aes(x = Date, y = S.P.Composite)) +
 ```
 
 ## Correlations
+In this section we tried to find correlations using different datasets in order to make better predictions for Bitcoins later in the report. Firstly, some attempts were made with only Bitcoins' data. Then we used S.P. Composite but this significantly limited our possible training and testing sets thus we decided to not use this in predictions. Finally, we looked for correlations between bitcoins and some indicators for top HDI countries. What is important - Bitcoins' dataset was based on days and WDI dataset was based on years. To compare values we calculated means for Bitcoins' years. However, no important correlation was found there.
 ```{r}
 
 ```
 
 
-### Correlation between Hrate and Mkpru
-```{r}
+### Correlation between Hrate, Diff, Trvou and Mkpru
+```{r corr_btc}
 btcPlusSP <- btcAllClean %>% inner_join(spCompositeClean, on='Date')
 btcPlusGold <- btcAllClean %>% inner_join(goldPricesClean, on='Date')
 
@@ -232,12 +239,23 @@ ggscatter(btcAllClean, x = "Mkpru", y = "Hrate",
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Mkpru", ylab = "Hrate", color = 'plum4')
+
+ggscatter(btcAllClean, x = "Mkpru", y = "Diff", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Mkpru", ylab = "Diff", color = 'plum3')
+
+ggscatter(btcAllClean, x = "Mkpru", y = "Trvou", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Mkpru", ylab = "Trvou", color = 'plum2')
+
 ```
 
 
 
 ### Correlations for Bitcoins' Data Including S.P. Composite
-```{r corelations}
+```{r correlations}
 
 
 ggscatter(btcPlusSP, x = "Mkpru", y = "S.P.Composite", 
@@ -257,8 +275,8 @@ ggscatter(btcPlusSP, x = "Mkpru", y = "Earnings",
 
 ```
 
-### Correlations for Bitcoins' Data Including Arbitrally Chosen Indexes from WDI
-```{r}
+### Correlations for Bitcoins' Data Including Arbitrally Chosen Indicators from WDI
+```{r corr_wdi}
 
 
 btcYearsSummary <- btcAllClean %>% mutate(Year = format(as.Date(Date, format="%d/%m/%Y"),"%Y")) %>% select(-Date) %>% group_by(Year) %>% dplyr::summarize(MeanDiff = mean(Diff), MeanHrate=mean(Hrate), MeanMkpru=mean(Mkpru), MeanTrvou=mean(Trvou)) %>% filter(Year > 2008 & Year <2021)
@@ -276,7 +294,7 @@ for (country in hdiTop) {
 }
 
 ```
-```{r}
+```{r corr_wdi2}
 for (country in hdiTop) {
   countryExample <- btcPlusCountry %>% filter(Country.Name == country)
   check <- cor(x = countryExample$MeanMkpru, y = countryExample$`Urban population growth (annual %)`, method = "pearson", use = "everything")
@@ -289,12 +307,9 @@ for (country in hdiTop) {
 ```
 
 
+## Bitcoins' Short-Term Prediction
 
-
-
-## Model
-
-```{r model}
+```{r model, warning=FALSE}
 
 set.seed(23)
 
@@ -310,11 +325,8 @@ test <- valid_and_test[ inTesting,]
 
 
 ctrl <- trainControl(
-    # powtórzona ocena krzyżowa
     method = "repeatedcv",
-    # liczba podziałów
     number = 2,
-    # liczba powtórzeń
     repeats = 5)
 
 
@@ -322,15 +334,12 @@ fit <- train(Mkpru ~ .,
              data = train,
              method = "rf",
              trControl = ctrl,
-             # Paramter dla algorytmu uczącego
              ntree = 10)
 
 fit
 
 pred <- predict(fit, newdata = test)
 preddf <- data.frame(Pred = pred, Mkpru = test$Mkpru)
-
-#View(preddf)
 
 datatable(preddf)
 
