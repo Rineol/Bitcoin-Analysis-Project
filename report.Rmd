@@ -14,10 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Extended Summary
-
+On of the most known measures for ranking countries is HDI - Human Development Index.  It takes into account: life expectancy at birth (in years), expected years of schooling, mean years of schooling and gross national income per capita. In this report we decided to choose top 24 countries from Latest Human Development Index Ranking and take a closer look at additional information from World Development Indicators in their context. Moreover, we tried to find correlations between Bitcoins' data from 2009 to 2021 and S.P.Composite dataset. Finally, short-term prediction for Bitcoin Market Price USD was made. 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-libraries <- c("dplyr", "tidyr", "ggplot2", "readxl", "imputeTS", "vtable", "skimr", "DT", "caret", "gganimate", "patchwork", "ggpubr", "effects") 
+libraries <- c("dplyr", "tidyr", "ggplot2", "readxl", "imputeTS", "vtable", "skimr", "DT", "caret", "gganimate", "ggpubr") 
 
 r = getOption("repos")
 r["CRAN"] = "http://cran.us.r-project.org"
@@ -29,9 +29,19 @@ for (l in libraries) {
 
 ```
 
+### HDI Top
+Top 24 countries according to http://hdr.undp.org/en/content/latest-human-development-index-ranking. Because Liechtenstein had many missing values in WDI dataset, we decided to change it to the next top country in the index - France. 
+```{r}
+hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
+```
 
+
+### Libraries
+During generation of this report we used the following libraries:
+```{r}
+libraries
+```
 ## Datasets Reading
-
 
 ```{r datasets_reading, message=FALSE, warning=FALSE}
 currExchRates <- read.csv("./datasets/CurrencyExchangeRates.csv")
@@ -49,6 +59,7 @@ btcTrvou <- read.csv("./datasets/BCHAIN-TRVOU.csv")
 ## Datasets Preparation
 
 ### Currency Exchange Rates
+In order to clean the Currency Exchange Rates Dataset we inserted 0's in Euro currency before '98 and used special function to fill empty individual places by making mean from adjacent values.
 
 ```{r tidy_currency}
 CurrExchRatesClean <- currExchRates %>% select(which(colMeans(is.na(.)) < 0.2))
@@ -74,15 +85,10 @@ goldPricesClean <- na_ma(goldPricesClean, k = 1)
 st(goldPricesClean)
 ```
 
-### World Development Index and Top Chosen Countries
+### World Development Indicators and Top Chosen Countries
+World Development Indicators' Dataset required more transformations than the rest. After creating the Years column top HDI countries for our analysis were filtered. We selected only these indicators which had less than 10% of NA's for filtered countries. The rest of missing values were filled with 0's.
 
 ```{r tidy_index, warning=FALSE}
-#https://worldpopulationreview.com/country-rankings/developed-countries
-#http://hdr.undp.org/en/content/latest-human-development-index-ranking
-
-hdiTop <- c('Norway', 'Ireland', 'Switzerland', 'Iceland', 'Hong Kong', 'Germany', 'Sweden', 'Netherlands', 'Australia', 'Denmark', 'Finland', 'Singapore', 'United Kingdom', 'New Zealand', 'Belgium', 'Canada', 'United States', 'Austria', 'Israel', 'Japan', 'Slovenia', 'Luxembourg', 'Korea, Rep.', 'Spain', 'France')
-
-
 
 worldDevInd$Series.Name<-gsub("\\$","D",worldDevInd$Series.Name)
 
@@ -99,8 +105,6 @@ worldDevIndClean <- worldDevIndClean %>%
 
 trial <- as.data.frame(worldDevIndClean)
 trial <- worldDevIndClean %>% filter(Country.Name %in% hdiTop)
-
-#trial <- trial %>% filter(Year==2020) %>% arrange(`GDP (current USD)`) 
 
 trial <- trial %>% select(which(colMeans(is.na(.)) < 0.10))
 
@@ -289,6 +293,7 @@ for (country in hdiTop) {
 
 
 ## Model
+
 ```{r model}
 
 set.seed(23)
@@ -326,6 +331,8 @@ pred <- predict(fit, newdata = test)
 preddf <- data.frame(Pred = pred, Mkpru = test$Mkpru)
 
 #View(preddf)
+
+datatable(preddf)
 
 print(ggscatter(preddf, x = "Mkpru", y = "Pred",
            
