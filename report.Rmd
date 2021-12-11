@@ -142,26 +142,25 @@ datatable(skim(wdiTop %>% dplyr::select(-Country.Name, -Country.Code, -Year)) %>
 
 example2019 <- wdiTop %>% filter(Year == 2019)
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 1') + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y =`Urban population growth (annual %)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Trade (% of GDP)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + ggtitle('Plot 2') + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y = `Trade (% of GDP)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y = `Total natural resources rents (% of GDP)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Population, total`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y = `Population, total`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Net primary income (Net income from abroad) (current USD)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y = `Net primary income (Net income from abroad) (current USD)`, fill=as.factor(Country.Name))) + geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`Birth rate, crude (per 1,000 people)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y = `Birth rate, crude (per 1,000 people)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
-ggplot(data = example2019, aes(x = Country.Name, y = example2019$`GDP (current USD)`, fill=as.factor(Country.Name))) +
-    geom_bar(stat = "identity") + coord_flip() + theme_minimal()
+ggplot(data = example2019, aes(x = Country.Name, y = `GDP (current USD)`, fill=as.factor(Country.Name))) +
+    geom_bar(stat = "identity") + coord_flip() + theme_minimal() + labs(fill='Country', x='Country')
 
 ```
 
@@ -177,18 +176,18 @@ spAnalysis <- spCompositeClean %>% pivot_longer(cols='S.P.Composite':'Cyclically
 
 earn <- spAnalysis %>% filter(Param %in% c('Earnings', 'Real.Earnings'))
 ggplot(data = earn, aes(x = Date, y = Value, color=as.factor(Param))) +
-    geom_line() + facet_wrap(~Param) + theme_minimal() + transition_reveal(Date)
+    geom_line() + facet_wrap(~Param) + labs(color='Type of Earnings') + theme_minimal() + transition_reveal(Date)
 
 
 ```
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 earn <- spAnalysis %>% filter(Param %in% c('Dividend', 'Real.Dividend'))
 ggplot(data = earn, aes(x = Date, y = Value, color=as.factor(Param))) +
-    geom_line() + facet_wrap(~Param) + theme_minimal() + transition_reveal(Date)
+    geom_line() + facet_wrap(~Param) + labs(color='Type of Dividend') + theme_minimal() + transition_reveal(Date)
 ```
 ```{r}
 ggplot(data = spCompositeClean, aes(x = Date, y = S.P.Composite)) +
-    geom_line(color='blue') + theme_minimal() + transition_reveal(Date)
+    geom_line(color='blue') + theme_minimal() + labs(title='S.P.Composite through Years') + transition_reveal(Date)
 ```
 
 
